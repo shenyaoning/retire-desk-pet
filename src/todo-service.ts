@@ -177,6 +177,11 @@ export function sortTodos(todos: Todo[], today: string): Todo[] {
   });
 }
 
+/** 今天要做的：未完成且计划日期不晚于今天（含逾期），按重要优先排序 */
+export function openTodosToday(todos: Todo[], today: string): Todo[] {
+  return sortTodos(todos.filter(todo => !todo.completedAt && todo.scheduledDate <= today), today);
+}
+
 export function reorderTodos(todos: Todo[], ids: string[]): Todo[] {
   const rank = new Map(ids.map((id, index) => [id, index + 1]));
   return todos.map(todo => rank.has(todo.id) ? { ...todo, sortOrder: rank.get(todo.id)! } : todo);

@@ -16,6 +16,7 @@ let view: TodoView | null = null;
 let environment: Environment = {};
 let activeId: string | null = null;
 let timer: number | undefined;
+let stressActive = false;
 
 function minutes(value: string): number {
   const [hour, minute] = value.split(":").map(Number);
@@ -43,7 +44,7 @@ function pump(now = new Date()): void {
     store.dailySummaryShown = date;
   }
   // 专注/午休期间不弹待办，计时结束后下一轮 pump 会补弹（reminderAt 已到期的仍在）
-  if (activeId || quiet(now) || hasPendingReminder() || reminderMode()) return;
+  if (stressActive || activeId || quiet(now) || hasPendingReminder() || reminderMode()) return;
   const todo = dueTodo(now.getTime());
   if (todo) {
     activeId = todo.id;
@@ -64,6 +65,28 @@ export function updateTodoEnvironment(next: Environment): void {
 }
 
 export function todoReminderActive(): boolean { return activeId !== null; }
+
+/** 悬停卡等处直接把某一条待办标记完成（重复待办按「工作日」规则排下一次） */
+export async function completeTodoById(id: string): Promise<void> {
+  const todo = store.todos.find(item => item.id === id);
+  if (!todo || todo.completedAt) return;
+  const now = Date.now();
+  const isWorkday = (date: string) => invoke<boolean>("is_workday", { date }).catch(() => {
+    const day = new Date(date + "T00:00:00").getDay();
+    return day > 0 && day < 6;
+  });
+  let nextWorkday = "";
+  if (todo.repeat.kind === "workdays") {
+    let candidate = new Date(now + 86400000);
+    for (let attempts = 0; attempts < 370; attempts += 1) {
+      const key = localDateKey(candidate);
+      if (await isWorkday(key)) { nextWorkday = key; break; }
+      candidate = new Date(candidate.getTime() + 86400000);
+    }
+  }
+  store.todos = completeTodo(store.todos, id, localDateKey(), date => date === nextWorkday, now);
+  pump();
+}
 
 export async function respondToTodoReminder(action: "done" | "later" | "tomorrow"): Promise<void> {
   const id = activeId;
@@ -98,3 +121,4 @@ export async function respondToTodoReminder(action: "done" | "later" | "tomorrow
 }
 
 export function refreshTodoCenter(): void { pump(); }
+export function setStressActive(active: boolean): void { stressActive = active; if (active) view?.hide(); if (!active) pump(); }

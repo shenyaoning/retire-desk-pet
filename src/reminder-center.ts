@@ -29,6 +29,7 @@ let environment: ReminderEnvironment = {};
 let shownId: string | null = null;
 let mode: ModeState | null = null;
 let alarmTimer: number | undefined;
+let stressActive = false;
 
 function engineSettings(): ReminderSettings {
   const settings = store.settings;
@@ -112,6 +113,7 @@ function beginLunchAlarm(): void {
 
 function pump(now = Date.now()): void {
   if (!state) return;
+  if (stressActive) return;
   if (mode) {
     if (mode.kind === "lunch" && mode.endsAt <= now && mode.alarmCount > 0) return;
     const transition = tickModeState(mode, now);
@@ -236,7 +238,19 @@ export function resetReminderSchedule(now = Date.now()): void {
 
 export function todayReminderStats() {
   if (state?.date === localDateKey(Date.now())) return { ...state.stats };
-  return store.reminderStats[localDateKey(Date.now())] ?? { standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, missed: 0 };
+  return store.reminderStats[localDateKey(Date.now())] ?? { standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, stressHits: 0, missed: 0 };
+}
+
+export function setStressActive(active: boolean): void {
+  stressActive = active;
+  if (active) view?.hide();
+  if (!active) pump();
+}
+
+export function recordStressHit(): void {
+  if (!state) return;
+  state.stats.stressHits = (state.stats.stressHits ?? 0) + 1;
+  save();
 }
 
 export function hasPendingReminder(): boolean {

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "sync:animations": "node scripts/sync-animations.mjs && python3 scripts/resize-pet-assets.py",
+    "sync:animations": "node scripts/sync-animations.mjs",
     "check:hair-gaps": "python3 scripts/check-hair-white-gaps.py",
     "resize:pet-assets": "python3 scripts/resize-pet-assets.py",
     "dev": "npm run sync:animations && vite",

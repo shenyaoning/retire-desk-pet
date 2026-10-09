@@ -39,6 +39,7 @@ export interface ReminderStats {
   eyeBreaks: number;
   exercises: number;
   focusSessions: number;
+  stressHits: number;
   missed: number;
 }
 
@@ -101,7 +102,7 @@ export function createReminderState(now: number, settings: ReminderSettings): Re
     active: null,
     queue: [],
     mutedToday: { sedentary: false, water: false, eye: false, exercise: false },
-    stats: { standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, missed: 0 },
+    stats: { standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, stressHits: 0, missed: 0 },
     firedAt: [],
     lastHealthIndex: null,
     goalJustReached: false,

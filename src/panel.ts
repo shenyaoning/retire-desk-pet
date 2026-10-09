@@ -126,6 +126,10 @@ function renderTodos() {
     row.append(checkbox, text, tag, edit, del);
     (todo.completedAt ? doneBox : todo.scheduledDate <= today ? todayBox : futureBox).appendChild(row);
   }
+  for (const box of [todayBox, futureBox]) {
+    if (box.children.length === 1) { const empty = document.createElement("p"); empty.className = "todo-empty"; empty.textContent = "暂无"; box.appendChild(empty); }
+  }
+  if (doneBox.children.length === 1) { const empty = document.createElement("p"); empty.className = "todo-empty"; empty.textContent = "暂无"; doneBox.appendChild(empty); }
   list.append(todayBox, futureBox, doneBox);
 }
 
@@ -156,6 +160,7 @@ function renderToday() {
   (document.getElementById("today-eye") as HTMLElement).textContent = `${stats.eyeBreaks} 次`;
   (document.getElementById("today-exercise") as HTMLElement).textContent = `${stats.exercises} / ${store.settings.reminders.exerciseGoal} 次`;
   (document.getElementById("today-focus") as HTMLElement).textContent = `${stats.focusSessions} 次`;
+  (document.getElementById("today-stress") as HTMLElement).textContent = `${stats.stressHits ?? 0} 次`;
   (document.getElementById("today-todos") as HTMLElement).textContent = `${counts.completed} / ${counts.total}`;
   (document.getElementById("today-missed") as HTMLElement).textContent = `${stats.missed} 次`;
   (document.getElementById("today-summary") as HTMLElement).textContent = summaryText(summaryBand(counts));

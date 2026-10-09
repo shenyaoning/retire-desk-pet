@@ -108,8 +108,17 @@ canvas { image-rendering: auto; }
 #board-text { position: absolute; display: flex; align-items: center; justify-content: center;
   color: #493025; font-family: "PingFang SC", sans-serif; font-weight: 800; line-height: 1;
   white-space: nowrap; pointer-events: none; }
-#day-badge { position: absolute; bottom: -8px; right: 3px; padding: 3px 7px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); box-shadow: 2px 2px 0 rgba(43,36,32,.2); font-size: 11px; white-space: nowrap; pointer-events: none; }
-.flip #day-badge { right: auto; left: 3px; }
+#badges { position: absolute; bottom: -8px; right: 3px; display: flex; gap: 4px; align-items: flex-end; }
+.flip #badges { right: auto; left: 3px; }
+#todo-badge { padding: 3px 7px; border: 2px solid var(--ink); border-radius: 8px; background: var(--wood); box-shadow: 2px 2px 0 rgba(43,36,32,.2); font-size: 11px; white-space: nowrap; cursor: pointer; pointer-events: auto; }
+#todo-badge:hover { background: #e8c98f; }
+#day-badge { padding: 3px 7px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper); box-shadow: 2px 2px 0 rgba(43,36,32,.2); font-size: 11px; white-space: nowrap; pointer-events: none; }
+#stress-game { position: absolute; right: calc(100% + 8px); bottom: 0; width: 286px; min-height: 292px; padding: 8px; background: var(--paper); border: 2px solid var(--ink); text-align: center; z-index: 8; }
+.flip #stress-game { right: auto; left: calc(100% + 8px); }
+.stress-top { display: flex; align-items: center; justify-content: space-between; gap: 5px; font-size: 11px; }
+#stress-canvas { display: block; width: 256px; height: 256px; margin: 0 auto; cursor: pointer; }
+#stress-word { position: absolute; top: 84px; right: 16px; color: var(--wood); font-size: 15px; font-weight: bold; }
+.flip #stress-word { right: auto; left: 16px; }
 
 /* ---------- 面板 / 设置 ---------- */
 #panel-view, #settings-view, #share-view {
@@ -127,6 +136,9 @@ canvas { image-rendering: auto; }
 .todo-row { display: flex; align-items: center; gap: 6px; padding: 7px 4px; border-bottom: 1px dashed #cfd6e2; }
 .todo-row.important .todo-text { font-weight: bold; }
 .todo-row.done .todo-text { text-decoration: line-through; color: #8991a0; }
+#todo-list section { margin-bottom: 16px; }
+#todo-list details { margin-top: 16px; }
+.todo-empty { color: #a0a8b8; padding: 5px 0; }
 .todo-text { flex: 1; }
 .todo-tag { color: var(--blue); font-size: 11px; }
 .panel header { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
@@ -271,3 +283,10 @@ body.listening * { cursor: crosshair; }
 .flip #bubble::after { right: auto; left: 12px; border-right: 2px solid var(--ink); border-left: none; }
 .flip #sign-banner { right: auto; left: 0; }
 .flip #hover-card { right: auto; left: 104px; }
+
+/* 悬停卡里的今日待办：只有按钮接收鼠标，卡片本身仍然穿透 */
+#hover-card .hv-todos { margin-top: 6px; border-top: 1px dashed #cfd6e2; padding-top: 4px; }
+#hover-card .hv-todo { display: flex; align-items: center; gap: 6px; line-height: 1.5; }
+#hover-card .hv-todo span { flex: 1; word-break: break-all; }
+#hover-card .hv-todo button { pointer-events: auto; padding: 0 6px; font-size: 11px; border-width: 1px; cursor: pointer; }
+#hover-card .hv-more { color: #8a93a6; font-size: 11px; }

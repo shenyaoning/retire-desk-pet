@@ -154,11 +154,11 @@ describe("reminder scheduler", () => {
 
   it("resets daily counters, mute flags, and firing history on the next day", () => {
     let state = createReminderState(at("09:00"), settings);
-    state.stats = { standUps: 4, waterCups: 7, eyeBreaks: 2, exercises: 1, focusSessions: 1, missed: 2 };
+    state.stats = { standUps: 4, waterCups: 7, eyeBreaks: 2, exercises: 1, focusSessions: 1, stressHits: 0, missed: 2 };
     state.mutedToday = { sedentary: true, water: true, eye: true, exercise: true };
     state.firedAt = [at("16:00")];
     state = tickReminderState(state, new Date("2026-10-09T09:00:00").getTime(), settings, {});
-    expect(state.stats).toEqual({ standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, missed: 0 });
+    expect(state.stats).toEqual({ standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, stressHits: 0, missed: 0 });
     expect(state.mutedToday).toEqual({ sedentary: false, water: false, eye: false, exercise: false });
     expect(state.firedAt).toEqual([]);
   });

@@ -5,6 +5,7 @@ import {
   importTodos,
   moveOverdueToToday,
   nextOccurrence,
+  openTodosToday,
   sortTodos,
   validateTodo,
   type Todo,
@@ -60,5 +61,19 @@ describe("todo persistence rules", () => {
     const imported = importTodos(JSON.stringify({ todos: [todo({ id: "new" })] }), full);
     expect(imported.todos).toHaveLength(MAX_TODOS);
     expect(imported.report.overLimit).toBe(1);
+  });
+});
+
+describe("openTodosToday", () => {
+  it("只含今天及逾期的未完成项，重要的在前，已完成和以后的不算", () => {
+    const list = [
+      todo({ id: "a", text: "今天普通", scheduledDate: "2026-10-09", sortOrder: 2 }),
+      todo({ id: "b", text: "今天重要", scheduledDate: "2026-10-09", priority: "important", sortOrder: 3 }),
+      todo({ id: "c", text: "逾期", scheduledDate: "2026-10-07", sortOrder: 1 }),
+      todo({ id: "d", text: "已完成", scheduledDate: "2026-10-09", completedAt: 5 }),
+      todo({ id: "e", text: "以后", scheduledDate: "2026-10-12" }),
+    ];
+    const ids = openTodosToday(list, "2026-10-09").map(item => item.id);
+    expect(ids).toEqual(["b", "c", "a"]);
   });
 });

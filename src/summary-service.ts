@@ -33,5 +33,5 @@ export function summaryBand(counts: { completed: number; total: number }): Summa
 }
 
 export function emptyReminderStats(): ReminderStats {
-  return { standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, missed: 0 };
+  return { standUps: 0, waterCups: 0, eyeBreaks: 0, exercises: 0, focusSessions: 0, stressHits: 0, missed: 0 };
 }

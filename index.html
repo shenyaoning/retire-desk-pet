@@ -16,7 +16,11 @@
       <canvas id="pet" class="pet-image visible" width="128" height="128"></canvas>
       <canvas id="pet-next" class="pet-image" width="128" height="128"></canvas>
       <div id="board-text" class="hidden"></div>
-      <div id="day-badge" class="hidden"></div>
+      <div id="badges"><button id="todo-badge" class="hidden" type="button"></button><div id="day-badge" class="hidden"></div></div>
+      <div id="stress-game" class="hidden" aria-live="polite">
+        <div class="stress-top"><b id="stress-title">解压一下</b><span id="stress-time">30 秒</span><span id="stress-hits">0 次</span><button id="stress-end" type="button">结束</button></div>
+        <canvas id="stress-canvas" width="256" height="256" aria-label="解压对象"></canvas><span id="stress-word"></span>
+      </div>
     </div>
   </div>
 
@@ -78,12 +82,12 @@
       <div id="p-todo" class="panel-page hidden">
         <div class="todo-add"><input id="todo-text" maxlength="40" placeholder="写一条待办" /><button id="todo-add">添加</button></div>
         <div class="todo-filters"><select id="todo-category"><option value="other">其他</option><option value="material">材料</option><option value="meeting">会议</option><option value="personal">个人</option></select><select id="todo-priority"><option value="normal">普通</option><option value="important">重要</option></select><select id="todo-repeat"><option value="once">仅一次</option><option value="daily">每天</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="workdays">工作日</option></select></div>
-        <div class="todo-filters"><label>提醒 <input id="todo-reminder" type="datetime-local" /></label><label>截止 <input id="todo-deadline" type="date" /></label></div>
+        <div class="todo-filters"><label>提醒（可不填） <input id="todo-reminder" type="datetime-local" /></label><label>截止（可不填） <input id="todo-deadline" type="date" /></label></div>
         <div id="todo-list"></div>
         <div class="todo-io"><button id="todo-export">导出待办</button><button id="todo-import">导入待办</button><input id="todo-import-file" type="file" accept="application/json,.json" hidden /></div>
       </div>
       <div id="p-today" class="panel-page hidden">
-        <div class="card reminder-summary"><div class="row"><span>今日起身</span><b id="today-standups">0 次</b></div><div class="row"><span>今日喝水</span><b id="today-water">0 / 8 杯</b></div><div class="row"><span>今日护眼</span><b id="today-eye">0 次</b></div><div class="row"><span>今日运动</span><b id="today-exercise">0 / 3 次</b></div><div class="row"><span>今日专注</span><b id="today-focus">0 次</b></div><div class="row"><span>待办完成</span><b id="today-todos">0 / 0</b></div><div class="row"><span>静默错过</span><b id="today-missed">0 次</b></div></div>
+        <div class="card reminder-summary"><div class="row"><span>今日起身</span><b id="today-standups">0 次</b></div><div class="row"><span>今日喝水</span><b id="today-water">0 / 8 杯</b></div><div class="row"><span>今日护眼</span><b id="today-eye">0 次</b></div><div class="row"><span>今日运动</span><b id="today-exercise">0 / 3 次</b></div><div class="row"><span>今日专注</span><b id="today-focus">0 次</b></div><div class="row"><span>今日解压</span><b id="today-stress">0 次</b></div><div class="row"><span>待办完成</span><b id="today-todos">0 / 0</b></div><div class="row"><span>静默错过</span><b id="today-missed">0 次</b></div></div>
         <p id="today-summary" class="preview"></p>
         <p id="today-mode" class="hint"></p>
       </div>
@@ -125,6 +129,13 @@
           <div id="s-error" class="form-error"></div>
         </section>
         <section>
+          <h2>解压</h2>
+          <div class="checks"><label><input type="checkbox" id="s-stress-enabled" /> 启用解压功能</label></div>
+          <div class="grid2"><label>解压对象名字 <input id="s-stress-name" maxlength="8" value="烦恼魔" /></label><label>把头换成自己的照片 <input id="s-stress-photo" type="file" accept="image/png,image/jpeg,image/webp" /></label></div>
+          <button id="s-stress-reset" type="button">恢复默认</button>
+          <p class="hint">照片只保存在你自己的电脑上，不会上传，也不会出现在分享图里。</p>
+        </section>
+        <section>
           <h2>桌宠</h2>
           <div class="grid2">
             <label>大小
@@ -141,6 +152,7 @@
           <div class="checks">
             <label><input type="checkbox" id="s-bubble" checked /> 显示台词气泡</label>
             <label><input type="checkbox" id="s-badge" checked /> 显示脚下数字牌</label>
+            <label><input type="checkbox" id="s-todobadge" checked /> 显示脚下待办小牌</label>
             <label><input type="checkbox" id="s-avoidfs" checked /> 全屏放映时自动躲起来</label>
             <label><input type="checkbox" id="s-autostart" /> 开机自启</label>
           </div>

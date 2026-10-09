@@ -29,9 +29,10 @@ import type { ReminderRequest } from "./reminder-engine";
 import { AnimationCatalog } from "./animation-assets";
 import { PetAnimator } from "./pet-animator";
 import { EVENT_ANIMATIONS, baseAnimationPlan, dayKey, randomDelay } from "./animation-config";
-import { createTodo, localDateKey, moveOverdueToToday, overdueTodos } from "./todo-service";
-import { respondToTodoReminder, startTodoCenter, updateTodoEnvironment } from "./todo-center";
+import { createTodo, localDateKey, moveOverdueToToday, openTodosToday, overdueTodos } from "./todo-service";
+import { completeTodoById, respondToTodoReminder, startTodoCenter, updateTodoEnvironment } from "./todo-center";
 import { confirmDialog, promptDialog } from "./ui";
+import { startStressGame } from "./stress";
 
 export const appWindow = getCurrentWebviewWindow();
 
@@ -126,7 +127,8 @@ function applyWindowSize(extraWL: number, extraHL: number): Promise<void> {
       // 从收起状态展开的这一刻决定方向；展开期间不变，避免中途镜像跳动
       try {
         const mon = await currentMonitor();
-        flipRight = !!mon && (pos.x - mon.position.x) / sf < extraWL + 8;
+        // 小人在所在屏幕的左半边就向右展开，右半边向左展开（不只是左边放不下才翻转，位置更可预期）
+        flipRight = !!mon && pos.x + (baseSize.w * sf) / 2 < mon.position.x + mon.size.width / 2;
       } catch { flipRight = false; }
       document.body.classList.toggle("flip", flipRight);
     }
@@ -176,6 +178,13 @@ async function primaryMonitor() {
   }
 }
 
+/** 按「基础窗口（不含气泡/卡片扩出来的部分）」的左上角摆放窗口。
+ *  启动时问候气泡可能已经把窗口撑大了，直接设位置会让气泡收起后小人往右偏出屏幕。 */
+async function setBasePosition(x: number, y: number, sf: number): Promise<void> {
+  await winQueue;
+  await appWindow.setPosition(new PhysicalPosition(x - (flipRight ? 0 : Math.round(extraW * sf)), y - Math.round(extraH * sf)));
+}
+
 export async function placeWindowBottomRight() {
   const mon = await primaryMonitor();
   const sf = await appWindow.scaleFactor();
@@ -183,7 +192,7 @@ export async function placeWindowBottomRight() {
   if (mon) {
     const x = mon.position.x + mon.size.width - w - Math.round(24 * sf);
     const y = mon.position.y + mon.size.height - h - Math.round(48 * sf);
-    await appWindow.setPosition(new PhysicalPosition(x, y));
+    await setBasePosition(x, y, sf);
   }
 }
 
@@ -210,7 +219,7 @@ export async function restoreOrPlace() {
     const mw = mon.size.width, mh = mon.size.height;
     const x = Math.min(Math.max(saved.x, mx), mx + mw - w);
     const y = Math.min(Math.max(saved.y, my), my + mh - h);
-    await appWindow.setPosition(new PhysicalPosition(x, y));
+    await setBasePosition(x, y, sf);
     store.windowPos = { x, y };
   } else {
     await placeWindowBottomRight();
@@ -589,6 +598,55 @@ function showDailyRollover() {
 let hoverTimer: number | undefined;
 let hoverHideTimer: number | undefined;
 
+/** 悬停卡下半部分：今天要做的待办（最多 3 条），每条一个「完成」按钮，点了这一条就消失 */
+function renderHoverTodos(card: HTMLElement): void {
+  const open = openTodosToday(store.todos, localDateKey());
+  if (!open.length) return;
+  const box = document.createElement("div"); box.className = "hv-todos";
+  const title = document.createElement("h3"); title.textContent = "今天待办"; box.appendChild(title);
+  for (const todo of open.slice(0, 3)) {
+    const row = document.createElement("div"); row.className = "hv-todo";
+    const text = document.createElement("span"); text.textContent = (todo.priority === "important" ? "★ " : "· ") + (todo.text.length > 16 ? todo.text.slice(0, 16) + "…" : todo.text);
+    const done = document.createElement("button"); done.type = "button"; done.textContent = "完成"; done.title = "做完了，从这里消失";
+    done.addEventListener("mousedown", e => e.stopPropagation());
+    done.addEventListener("click", e => { e.stopPropagation(); void finishTodoFromCard(todo.id); });
+    row.append(text, done); box.appendChild(row);
+  }
+  if (open.length > 3) { const more = document.createElement("div"); more.className = "hv-more"; more.textContent = `还有 ${open.length - 3} 条，点脚下「待办」查看`; box.appendChild(more); }
+  card.appendChild(box);
+}
+
+async function finishTodoFromCard(id: string): Promise<void> {
+  await completeTodoById(id);
+  refreshTodoBadge();
+  hideHoverCard();
+  window.setTimeout(() => void showHoverCard(), 120);   // 重新量一遍卡片高度并刷新列表
+}
+
+/** 脚下「待办 N」小牌：今天还有几条没做 */
+export function refreshTodoBadge(): void {
+  const badge = document.getElementById("todo-badge");
+  if (!badge) return;
+  const open = openTodosToday(store.todos, localDateKey());
+  badge.textContent = `待办 ${open.length}`;
+  badge.classList.toggle("hidden", open.length === 0 || store.settings.showTodoBadge === false);
+}
+
+/** 每天第一次启动：举牌写「N件」，气泡说最靠前的一条；不会一直举着 */
+async function showTodoSignToday(): Promise<void> {
+  const today = localDateKey();
+  const key = `rdp.v1.todo-sign-${today}`;
+  if (localStorage.getItem(key)) return;
+  const open = openTodosToday(store.todos, today);
+  if (!open.length) return;
+  for (let i = 0; i < 40 && (signing || hasPendingReminder()); i += 1) await new Promise(resolve => window.setTimeout(resolve, 500));
+  if (mode !== "pet" || hidden || signing) return;
+  localStorage.setItem(key, "1");
+  void showSign("", `${open.length}件`);
+  const first = open[0].text;
+  void showBubble(`今天有 ${open.length} 件待办：${first.length > 16 ? first.slice(0, 16) + "…" : first}`, true);
+}
+
 async function showHoverCard() {
   const card = document.getElementById("hover-card")!;
   const inf = await refreshInfo();
@@ -601,6 +659,7 @@ async function showHoverCard() {
     `<div>还有 <b>${inf.days_left}</b> 天</div>` +
     `<div>≈ ${y} 年 ${m} 个月 ${d} 天</div>` +
     `<div>${inf.retire_date}（${inf.retire_age_label}）退休</div>`;
+  renderHoverTodos(card);
   card.style.visibility = "hidden";
   card.classList.remove("hidden");
   const rect = card.getBoundingClientRect();
@@ -672,12 +731,14 @@ export async function checkSignEvents() {
     localStorage.setItem("rdp.v1." + key, "1");
     if (milestone) store.fireMilestone(milestone);
     void showSign(text, `${inf.days_left}`, !!milestone);
+    void showTodoSignToday();
     return;
   }
   if (milestone) {
     store.fireMilestone(milestone);
     void showSign(text, `${inf.days_left}`, !!milestone);
   }
+  void showTodoSignToday();
 }
 
 function lastNationalDay(inf: RetireInfo): { id: string; text: string } | null {
@@ -711,7 +772,8 @@ function setupPointer() {
 
   cv.addEventListener("mousedown", async (e) => {
     if (e.button !== 0) return;   // 右键只弹菜单，别当成拖拽
-    if ((e.target as HTMLElement).closest("#bubble button")) return;
+    if ((e.target as HTMLElement).closest("#bubble button, #todo-badge, #hover-card button")) return;
+    if ((e.target as HTMLElement).closest("#stress-game")) return;
     if (mode !== "pet" || signing) return;
     if (acknowledgeLunchAlarm()) return;
     down = true; moved = false;
@@ -749,6 +811,7 @@ function setupPointer() {
 
   window.addEventListener("mouseup", (e) => {
     if (e.button !== 0 || !down) return;
+    if ((e.target as HTMLElement).closest("#stress-game")) return;
     down = false;
     if (dragging) {
       dragging = false;
@@ -789,6 +852,8 @@ function setupPointer() {
   cv.addEventListener("mouseenter", () => {
     window.clearTimeout(hoverTimer);
     window.clearTimeout(hoverHideTimer);
+    // 卡片已经显示时（比如鼠标移去点「完成」又回来），不要重画，否则按钮会在点击途中被换掉
+    if (!document.getElementById("hover-card")!.classList.contains("hidden")) return;
     hoverTimer = window.setTimeout(() => { if (!dragging && mode === "pet") void showHoverCard(); }, 500);
   });
   cv.addEventListener("mouseleave", () => {
@@ -838,6 +903,7 @@ async function showContextMenu() {
             await MenuItem.new({ text: "开始专注", action: () => { startFocus(); } }),
             await MenuItem.new({ text: "开始午休", action: () => { void chooseLunchDuration(); } }),
           ]),
+      ...(s.stressEnabled && !reminderMode() ? [await MenuItem.new({ text: "解压一下", action: () => { void openStressGame(); } })] : []),
       await MenuItem.new({ text: "设置…", action: () => void openSettings() }),
       await MenuItem.new({ text: "说句话", action: () => { playTemp(EVENT_RULES.poke.id); void showBubble(speakLine()); } }),
       await PredefinedMenuItem.new({ item: "Separator" }),
@@ -864,6 +930,16 @@ async function showContextMenu() {
     ],
   });
   await menu.popup();
+}
+
+async function openStressGame(): Promise<void> {
+  if (mode !== "pet" || hidden) return;
+  await expandFor("stress", 304, 132);
+  await startStressGame(() => {
+    void collapseFor("stress");
+    playTemp("mood-11");
+    void showBubble("好啦，先松一口气。", true);
+  });
 }
 
 async function chooseLunchDuration(): Promise<void> {
@@ -967,6 +1043,10 @@ async function applyWindowSizeAbsolute(extraWL: number, extraHL: number) {
 /* ---------------- 事件与启动 ---------------- */
 
 export async function setupPet() {
+  document.getElementById("todo-badge")?.addEventListener("click", () => { hideHoverCard(); void openPanel("todo"); });
+  window.addEventListener("rdp:todos", refreshTodoBadge);
+  window.setInterval(refreshTodoBadge, 30_000);
+  refreshTodoBadge();
   document.getElementById("x-panel")?.addEventListener("click", () => void closeToPet());
   document.getElementById("x-settings")?.addEventListener("click", () => void closeToPet());
   scale = store.settings.scale;

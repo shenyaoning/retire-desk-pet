@@ -5,6 +5,7 @@ import { closeToPet, resetBaseAnim, setScale, setBaseSize, PET_SIZES, checkSignE
 import { renderLinesSection } from "./settings-lines";
 import { toast, confirmDialog } from "./ui";
 import { resetReminderSchedule, updateReminderEnvironment } from "./reminder-center";
+import { validateStressPhoto } from "./stress-state";
 
 
 const $sel = (id: string) => document.getElementById(id) as HTMLSelectElement;
@@ -131,6 +132,7 @@ export function renderSettings() {
   (document.getElementById("s-payday") as HTMLInputElement).value = String(s.payday);
   (document.getElementById("s-bubble") as HTMLInputElement).checked = s.showBubble;
   (document.getElementById("s-badge") as HTMLInputElement).checked = s.showBadge;
+  (document.getElementById("s-todobadge") as HTMLInputElement).checked = s.showTodoBadge !== false;
   (document.getElementById("s-avoidfs") as HTMLInputElement).checked = s.avoidFullscreen;
   (document.getElementById("s-remind-sedentary") as HTMLInputElement).checked = s.reminders.sedentaryEnabled;
   (document.getElementById("s-remind-water") as HTMLInputElement).checked = s.reminders.waterEnabled;
@@ -140,6 +142,8 @@ export function renderSettings() {
   (document.getElementById("s-lunch-alarm") as HTMLInputElement).checked = s.reminders.lunchAlarm;
   (document.getElementById("s-meeting") as HTMLInputElement).checked = s.meetingMode;
   (document.getElementById("s-animations") as HTMLInputElement).checked = s.animations === true;
+  (document.getElementById("s-stress-enabled") as HTMLInputElement).checked = s.stressEnabled === true;
+  (document.getElementById("s-stress-name") as HTMLInputElement).value = s.stressName || "烦恼魔";
   (document.getElementById("s-sedentary-minutes") as HTMLSelectElement).value = String(s.reminders.sedentaryMinutes);
   (document.getElementById("s-water-goal") as HTMLInputElement).value = String(s.reminders.waterGoal);
   (document.getElementById("s-water-minutes") as HTMLInputElement).value = String(s.reminders.waterMinutes);
@@ -174,6 +178,11 @@ let bound = false;
 function bindOnce() {
   if (bound) return;
   bound = true;
+  const photoInput = document.getElementById("s-stress-photo") as HTMLInputElement;
+  photoInput.addEventListener("change", () => { void saveStressPhoto(photoInput.files?.[0] ?? null); });
+  document.getElementById("s-stress-reset")?.addEventListener("click", () => {
+    localStorage.removeItem("rdp.v1.stress-photo"); photoInput.value = ""; toast("已恢复默认小恶魔头");
+  });
 
   document.getElementById("s-bosskey-set")?.addEventListener("click", async () => {
     document.body.classList.add("listening");
@@ -216,10 +225,13 @@ function bindOnce() {
     s.payday = Number((document.getElementById("s-payday") as HTMLInputElement).value) || 15;
     s.showBubble = (document.getElementById("s-bubble") as HTMLInputElement).checked;
     s.showBadge = (document.getElementById("s-badge") as HTMLInputElement).checked;
+    s.showTodoBadge = (document.getElementById("s-todobadge") as HTMLInputElement).checked;
     s.avoidFullscreen = (document.getElementById("s-avoidfs") as HTMLInputElement).checked;
     s.meetingMode = (document.getElementById("s-meeting") as HTMLInputElement).checked;
     const animationsChanged = s.animations !== (document.getElementById("s-animations") as HTMLInputElement).checked;
     s.animations = (document.getElementById("s-animations") as HTMLInputElement).checked;
+    s.stressEnabled = (document.getElementById("s-stress-enabled") as HTMLInputElement).checked;
+    s.stressName = (document.getElementById("s-stress-name") as HTMLInputElement).value.trim().slice(0, 8) || "烦恼魔";
     s.reminders.sedentaryEnabled = (document.getElementById("s-remind-sedentary") as HTMLInputElement).checked;
     s.reminders.waterEnabled = (document.getElementById("s-remind-water") as HTMLInputElement).checked;
     s.reminders.eyeEnabled = (document.getElementById("s-remind-eye") as HTMLInputElement).checked;
@@ -268,6 +280,18 @@ function bindOnce() {
     store.settings = { ...defaults.settings };
     window.location.reload();
   });
+}
+
+async function saveStressPhoto(file: File | null): Promise<void> {
+  if (!file) return;
+  const error = validateStressPhoto(file);
+  if (error) { toast(error, "err"); return; }
+  const url = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(file); });
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = url; });
+  const size = Math.min(image.width, image.height); const sx = Math.floor((image.width - size) / 2), sy = Math.floor((image.height - size) / 2);
+  const canvas = document.createElement("canvas"); canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext("2d")!; ctx.beginPath(); ctx.arc(128, 128, 128, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(image, sx, sy, size, size, 0, 0, 256, 256);
+  localStorage.setItem("rdp.v1.stress-photo", canvas.toDataURL("image/png")); toast("照片已保存在本机");
 }
 
 /** 捕获下一个按键组合（老板键改键）；Esc 取消 */

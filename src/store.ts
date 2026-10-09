@@ -16,11 +16,14 @@ export interface Settings {
   payday: number;
   showBubble: boolean;
   showBadge: boolean;
+  showTodoBadge?: boolean;
   avoidFullscreen: boolean;
   meetingMode: boolean;
   skin: string;
   shareStandups?: boolean;
   animations?: boolean;   // 逐帧动画，默认关（静态表情更流畅）
+  stressEnabled: boolean;
+  stressName: string;
   bossKey?: string;       // 未设置时用默认键
   reminders: ReminderPreferences;
 }
@@ -59,11 +62,14 @@ export const defaults: { profile: Profile; settings: Settings } = {
     payday: 15,
     showBubble: true,
     showBadge: true,
+    showTodoBadge: true,
     avoidFullscreen: true,
     meetingMode: false,
     skin: "default",
     shareStandups: false,
     animations: false,
+    stressEnabled: false,
+    stressName: "烦恼魔",
     reminders: {
       sedentaryEnabled: true,
       sedentaryMinutes: 60,
@@ -147,7 +153,7 @@ export const store = {
       return raw && Array.isArray(JSON.parse(raw)) ? JSON.parse(raw) as Todo[] : [];
     } catch { return []; }
   },
-  set todos(v: Todo[]) { write("todos", v); },
+  set todos(v: Todo[]) { write("todos", v); if (typeof window !== "undefined") window.dispatchEvent(new Event("rdp:todos")); },
   get dailySummaryShown(): string | null { return localStorage.getItem(KEY + "daily-summary-shown"); },
   set dailySummaryShown(v: string | null) {
     if (v) localStorage.setItem(KEY + "daily-summary-shown", v);
