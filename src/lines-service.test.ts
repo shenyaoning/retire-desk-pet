@@ -12,7 +12,7 @@ function seqRng(mod: number) {
   return () => ((i++) % mod) / mod;
 }
 
-const base: LinesConfig = { custom: [], disabledBuiltin: [], mode: "mix" };
+const base: LinesConfig = { custom: [], disabledBuiltin: [], mode: "mix", style: "normal" };   // 这些用例只验证抽取逻辑，固定用「正常」风格
 
 function customLine(text: string, scene: CustomLine["scene"] = "general"): CustomLine {
   return { id: text, scene, text };
