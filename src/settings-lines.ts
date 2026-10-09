@@ -26,7 +26,7 @@ export function renderLinesSection() {
 
   const modeSel = el<HTMLSelectElement>("ln-mode");
   modeSel.value = c.mode;
-  el<HTMLSelectElement>("ln-style").value = c.style ?? "normal";
+  el<HTMLSelectElement>("ln-style").value = c.style ?? "mix";
   renderModeHint(c.mode, c.custom.length);
 
   const sceneSel = el<HTMLSelectElement>("ln-scene");

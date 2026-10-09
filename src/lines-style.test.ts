@@ -13,16 +13,17 @@ describe("抽象风格台词", () => {
       }
     }
   });
-  it("默认只抽正常台词；选抽象只抽抽象；混合两边都有", () => {
+  it("选正常只抽正常台词；选抽象只抽抽象；混合（默认）两边都有", () => {
     const base = { ...LINES_DEFAULT, mode: "builtin_only" as const };
     const seen = (style?: "normal" | "abstract" | "mix") => {
       const set = new Set<string>();
       for (let i = 0; i < 600; i += 1) set.add(pickLine({ ...base, style }, "general", { rng: () => (i + 0.5) / 600 }).text);
       return set;
     };
-    const normal = seen(); const abstract = seen("abstract"); const mix = seen("mix");
+    const normal = seen("normal"); const abstract = seen("abstract"); const mix = seen("mix"); const byDefault = seen();
     expect([...normal].every(t => lines.general.includes(t))).toBe(true);
     expect([...abstract].every(t => abstractLines.general.includes(t))).toBe(true);
+    expect([...byDefault].some(t => abstractLines.general.includes(t))).toBe(true);
     expect([...mix].some(t => lines.general.includes(t))).toBe(true);
     expect([...mix].some(t => abstractLines.general.includes(t))).toBe(true);
   });

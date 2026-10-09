@@ -25,7 +25,7 @@ export interface LinesConfig {
   style?: LinesStyle;
 }
 
-export const LINES_DEFAULT: LinesConfig = { custom: [], disabledBuiltin: [], mode: "mix" };
+export const LINES_DEFAULT: LinesConfig = { custom: [], disabledBuiltin: [], mode: "mix", style: "mix" };
 
 export const MAX_LINE_LEN = 30;
 export const MAX_CUSTOM_LINES = 100;
@@ -58,7 +58,7 @@ export interface PickResult {
 }
 
 function builtinSource(scene: SceneKey, cfg: LinesConfig): string[] {
-  const style = cfg.style ?? "normal";
+  const style = cfg.style ?? "mix";   // 默认正常+抽象混合（雪 2026-10-09 定）
   if (style === "abstract") return abstractLines[scene].length > 0 ? abstractLines[scene] : lines[scene];
   if (style === "mix") return [...lines[scene], ...abstractLines[scene]];
   return lines[scene];
