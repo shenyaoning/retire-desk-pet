@@ -23,13 +23,22 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npm test
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build installer
+        shell: pwsh
+        run: |
+          npm run tauri build -- --bundles nsis 2>&1 | Tee-Object -FilePath build.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            $tail = (Get-Content build.log -Tail 70 | Out-String)
+            $tail = $tail.Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+            Write-Host "::error title=build log tail::$tail"
+            exit 1
+          }
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "退休桌宠 ${{ github.ref_name }}（Windows，试用版）"
-          releaseBody: "Windows 安装包（未签名，首次运行会出现蓝色提示，选「更多信息 → 仍要运行」）。数据只保存在本机，不联网。"
-          releaseDraft: false
+          tag_name: ${{ github.ref_name }}
+          name: "退休桌宠 ${{ github.ref_name }}（Windows，试用版）"
+          body: "Windows 安装包（未签名，首次运行会出现蓝色提示，选「更多信息 → 仍要运行」）。数据只保存在本机，不联网。"
           prerelease: true
-          args: --bundles nsis
+          files: src-tauri/target/release/bundle/nsis/*.exe
