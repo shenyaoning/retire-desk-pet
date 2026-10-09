@@ -41,6 +41,24 @@ macOS 已验证；Windows 和 Linux 需要在对应系统完成打包和测试�
 - 电脑静音、合盖或系统限制时，午休提示音可能无法播放。
 - 法定工作日数据随版本更新，未联网时不会自动刷新。
 
+## 截图
+
+| 倒计时面板 | 待办 |
+|---|---|
+| ![倒计时面板](docs/screenshots/panel-countdown.png) | ![待办](docs/screenshots/panel-todo.png) |
+
+| 鼠标停在小人身上：今天待办，点「完成」就消失 | 解压一下 |
+|---|---|
+| ![悬停卡](docs/screenshots/pet-hover-todos.png) | ![解压](docs/screenshots/stress-game.png) |
+
+截图里的日期和待办是示例数据。
+
+## 下载安装（Windows）
+
+在仓库的 **Releases** 页面下载 `.exe` 安装包。目前是**试用版，没有代码签名**，第一次运行会出现蓝色提示「Windows 已保护你的电脑」，点「更多信息」再点「仍要运行」即可。软件完全离线，数据只保存在你自己的电脑上。
+
+如果安装时提示缺少 WebView2：Windows 10 较旧的版本需要先装微软的 WebView2 运行时（Windows 11 自带）。
+
 ## 许可
 
 - **代码**：MIT 许可，见 [LICENSE](LICENSE)。
