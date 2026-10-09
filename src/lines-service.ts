@@ -4,9 +4,12 @@
  * 关闭的内置台词以文本记录；场景无可用台词回退「平时」组。
  */
 import { lines, SCENE_KEYS, type SceneKey } from "./lines";
+import { abstractLines } from "./lines-abstract";
 export type { SceneKey };
 
 export type LinesMode = "mix" | "custom_only" | "builtin_only";
+/** 内置台词的风格：正常（默认）/ 抽象 / 混合 */
+export type LinesStyle = "normal" | "abstract" | "mix";
 
 export interface CustomLine {
   id: string;
@@ -19,6 +22,7 @@ export interface LinesConfig {
   /** 被关掉的内置台词文本 */
   disabledBuiltin: string[];
   mode: LinesMode;
+  style?: LinesStyle;
 }
 
 export const LINES_DEFAULT: LinesConfig = { custom: [], disabledBuiltin: [], mode: "mix" };
@@ -53,8 +57,15 @@ export interface PickResult {
   fallbackReason?: string;
 }
 
+function builtinSource(scene: SceneKey, cfg: LinesConfig): string[] {
+  const style = cfg.style ?? "normal";
+  if (style === "abstract") return abstractLines[scene].length > 0 ? abstractLines[scene] : lines[scene];
+  if (style === "mix") return [...lines[scene], ...abstractLines[scene]];
+  return lines[scene];
+}
+
 function enabledBuiltin(scene: SceneKey, cfg: LinesConfig): string[] {
-  return lines[scene].filter(t => !cfg.disabledBuiltin.includes(t));
+  return builtinSource(scene, cfg).filter(t => !cfg.disabledBuiltin.includes(t));
 }
 
 /** 内置池：临近退休时平时场景在 general/retire 两组间各占一半概率（组级掷签，组空换另一组） */

@@ -3,7 +3,7 @@ import { lines, SCENE_KEYS, SCENE_LABELS, type SceneKey } from "./lines";
 import { confirmDialog } from "./ui";
 import {
   validateCustomLine, importLines, exportLines, describeImportReport,
-  renderLine, MAX_LINE_LEN, makeId, type CustomLine, type LinesMode,
+  renderLine, MAX_LINE_LEN, makeId, type CustomLine, type LinesMode, type LinesStyle,
 } from "./lines-service";
 import { store } from "./store";
 import type { LinesConfig } from "./lines-service";
@@ -26,6 +26,7 @@ export function renderLinesSection() {
 
   const modeSel = el<HTMLSelectElement>("ln-mode");
   modeSel.value = c.mode;
+  el<HTMLSelectElement>("ln-style").value = c.style ?? "normal";
   renderModeHint(c.mode, c.custom.length);
 
   const sceneSel = el<HTMLSelectElement>("ln-scene");
@@ -218,6 +219,12 @@ function bindOnce() {
     c.mode = (e.target as HTMLSelectElement).value as LinesMode;
     saveCfg(c);
     renderModeHint(c.mode, c.custom.length);
+  });
+
+  el<HTMLSelectElement>("ln-style").addEventListener("change", (e) => {
+    const c = cfg();
+    c.style = (e.target as HTMLSelectElement).value as LinesStyle;
+    saveCfg(c);
   });
 
   el<HTMLButtonElement>("ln-export").addEventListener("click", () => {
