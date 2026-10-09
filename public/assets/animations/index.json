@@ -1,0 +1,68 @@
+{
+  "animations": [
+    {
+      "id": "mood-01",
+      "directory": "01-淡定眨眼"
+    },
+    {
+      "id": "mood-02",
+      "directory": "02-喝茶"
+    },
+    {
+      "id": "mood-03",
+      "directory": "03-打哈欠"
+    },
+    {
+      "id": "mood-04",
+      "directory": "04-馋饭"
+    },
+    {
+      "id": "mood-05",
+      "directory": "05-犯困"
+    },
+    {
+      "id": "mood-06",
+      "directory": "06-开会放空"
+    },
+    {
+      "id": "mood-07",
+      "directory": "07-下班开心"
+    },
+    {
+      "id": "mood-08",
+      "directory": "08-周五兴奋"
+    },
+    {
+      "id": "mood-09",
+      "directory": "09-被戳"
+    },
+    {
+      "id": "mood-10",
+      "directory": "10-无奈叹气"
+    },
+    {
+      "id": "mood-11",
+      "directory": "11-得意"
+    },
+    {
+      "id": "mood-12",
+      "directory": "12-生气"
+    },
+    {
+      "id": "mood-13",
+      "directory": "13-加班崩溃"
+    },
+    {
+      "id": "mood-14",
+      "directory": "14-被表扬害羞"
+    },
+    {
+      "id": "mood-15",
+      "directory": "15-感动"
+    },
+    {
+      "id": "mood-16",
+      "directory": "16-举牌"
+    }
+  ]
+}

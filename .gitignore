@@ -1,0 +1,13 @@
+node_modules/
+dist/
+src-tauri/target/
+assets-src/out/
+.DS_Store
+__pycache__/
+*.pyc
+.env
+.env.*
+*.log
+node_modules
+dist
+src-tauri/target

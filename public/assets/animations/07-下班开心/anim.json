@@ -1,0 +1,42 @@
+{
+ "frames": [
+  "f01.png",
+  "f02.png",
+  "f03.png",
+  "f04.png",
+  "f05.png",
+  "f06.png"
+ ],
+ "order": [
+  1,
+  1,
+  2,
+  3,
+  4,
+  4,
+  5,
+  6
+ ],
+ "dur_ms": 95,
+ "dur_by_frame_ms": {
+  "1": 300,
+  "2": 110,
+  "3": 90,
+  "4": 140,
+  "5": 100,
+  "6": 160
+ },
+ "lift_px_of_240": [
+  0.0,
+  0.0,
+  14.0,
+  44.0,
+  18.0,
+  0.0
+ ],
+ "squash": [],
+ "canvas": 512,
+ "anchor": "bottom-center",
+ "effects": {},
+ "effects_note": "第 j 个播放序号(从0)的效果：shake=±px 隔帧左右交替(px 按 240 画布，换算 px*显示宽/240)；pulse=整体放大 1+pulse*(0.5-0.5cos(2πj/N)) 以底边中点为原点；sway=绕底边中点旋转 sway*sin(2πj/N) 度；sigh=纵向缩 1-sigh*t、横向增 1+0.35*sigh*t，t=0.5-0.5cos(2πj/N)。N=order 长度"
+}

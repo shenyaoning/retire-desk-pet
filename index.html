@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>退休桌宠</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <!-- 桌宠形态：舞台固定在窗口右下角，窗口按气泡/悬停卡/举牌需要临时扩大 -->
+  <div id="pet-view">
+    <div id="stage">
+      <div id="hover-card" class="hidden"></div>
+      <div id="bubble" class="hidden"></div>
+      <div id="sign-banner" class="hidden"></div>
+      <canvas id="pet" class="pet-image visible" width="128" height="128"></canvas>
+      <canvas id="pet-next" class="pet-image" width="128" height="128"></canvas>
+      <div id="board-text" class="hidden"></div>
+      <div id="day-badge" class="hidden"></div>
+    </div>
+  </div>
+
+  <!-- 倒计时面板形态 -->
+  <div id="panel-view" class="hidden">
+    <div class="dragbar" data-tauri-drag-region>
+      <span data-tauri-drag-region>退休倒计时（按住这里拖动窗口）</span>
+      <button class="dragbar-x" id="x-panel" title="关闭">×</button>
+    </div>
+    <div class="panel">
+      <nav class="panel-tabs" id="p-tabs">
+        <button data-page="overview" class="on">倒计时</button><button data-page="todo">待办</button><button data-page="today">今日</button>
+      </nav>
+      <div id="p-overview">
+      <header>
+        <canvas id="panel-pet" width="64" height="64"></canvas>
+        <div class="panel-title">
+          <h1>离退休还有</h1>
+          <div class="big-days"><span id="p-days">-</span><small>天</small></div>
+          <div class="switch-row" id="p-switch">
+            <button data-mode="ymd" class="on">年月天</button>
+            <button data-mode="workdays">工作日</button>
+            <button data-mode="seconds">秒</button>
+          </div>
+          <div id="p-alt" class="alt-line">-</div>
+        </div>
+      </header>
+      <div class="card">
+        <div class="row"><span>法定退休年龄</span><b id="p-age">-</b></div>
+        <div class="row"><span>退休日期</span><b id="p-date">-</b></div>
+        <div class="row" id="p-progress-row" hidden>
+          <span>已工作</span>
+          <div class="bar"><i id="p-bar"></i></div>
+          <b id="p-progress">-</b>
+        </div>
+        <div class="row">
+          <span>弹性退休</span>
+          <input type="range" id="p-flex" min="-36" max="36" step="1" value="0" />
+          <b id="p-flex-label">法定</b>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row"><span>距下班</span><b id="p-offwork">-</b></div>
+        <div class="row"><span>距发工资</span><b id="p-payday">-</b></div>
+        <div class="row"><span>下一法定假日</span><b id="p-holiday">-</b></div>
+      </div>
+      <div class="card reminder-summary">
+        <div class="row"><span>今日起身</span><b id="p-standups">0 次</b></div>
+        <div class="row"><span>今日喝水</span><b id="p-water">0 / 8 杯</b></div>
+        <div class="row"><span>静默错过</span><b id="p-missed">0 次</b></div>
+      </div>
+      <footer>
+        <button id="p-share">生成分享卡</button>
+        <button id="p-settings">设置</button>
+        <button id="p-back">收起</button>
+      </footer>
+      <p class="legal">按 2025 年渐进式延迟退休规定计算，仅供参考，以所在单位人事部门核定为准。</p>
+      </div>
+      <div id="p-todo" class="panel-page hidden">
+        <div class="todo-add"><input id="todo-text" maxlength="40" placeholder="写一条待办" /><button id="todo-add">添加</button></div>
+        <div class="todo-filters"><select id="todo-category"><option value="other">其他</option><option value="material">材料</option><option value="meeting">会议</option><option value="personal">个人</option></select><select id="todo-priority"><option value="normal">普通</option><option value="important">重要</option></select><select id="todo-repeat"><option value="once">仅一次</option><option value="daily">每天</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="workdays">工作日</option></select></div>
+        <div class="todo-filters"><label>提醒 <input id="todo-reminder" type="datetime-local" /></label><label>截止 <input id="todo-deadline" type="date" /></label></div>
+        <div id="todo-list"></div>
+        <div class="todo-io"><button id="todo-export">导出待办</button><button id="todo-import">导入待办</button><input id="todo-import-file" type="file" accept="application/json,.json" hidden /></div>
+      </div>
+      <div id="p-today" class="panel-page hidden">
+        <div class="card reminder-summary"><div class="row"><span>今日起身</span><b id="today-standups">0 次</b></div><div class="row"><span>今日喝水</span><b id="today-water">0 / 8 杯</b></div><div class="row"><span>今日护眼</span><b id="today-eye">0 次</b></div><div class="row"><span>今日运动</span><b id="today-exercise">0 / 3 次</b></div><div class="row"><span>今日专注</span><b id="today-focus">0 次</b></div><div class="row"><span>待办完成</span><b id="today-todos">0 / 0</b></div><div class="row"><span>静默错过</span><b id="today-missed">0 次</b></div></div>
+        <p id="today-summary" class="preview"></p>
+        <p id="today-mode" class="hint"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置形态 -->
+  <div id="settings-view" class="hidden">
+    <div class="dragbar" data-tauri-drag-region>
+      <span data-tauri-drag-region>设置（按住这里拖动窗口）</span>
+      <button class="dragbar-x" id="x-settings" title="关闭">×</button>
+    </div>
+    <div class="panel settings">
+      <header><h1>设置</h1></header>
+      <div class="settings-body">
+        <section>
+          <h2>退休倒计时</h2>
+          <div class="grid2">
+            <div class="ymd">
+              <span class="ymd-label">出生日期</span>
+              <select id="s-by"></select><span>年</span>
+              <select id="s-bm"></select><span>月</span>
+              <select id="s-bd"></select><span>日</span>
+            </div>
+            <label>类别
+              <select id="s-category">
+                <option value="male">男（原60岁）</option>
+                <option value="female55">女·原55岁（管理/专业技术岗）</option>
+                <option value="female50">女·原50岁（工人岗）</option>
+              </select>
+            </label>
+            <div class="ymd">
+              <span class="ymd-label">参加工作（可选，用于进度条）</span>
+              <select id="s-jy"></select><span>年</span>
+              <select id="s-jm"></select><span>月</span>
+            </div>
+          </div>
+          <div id="s-preview" class="preview">选好出生日期和类别，这里会显示你的退休日期。</div>
+          <div id="s-error" class="form-error"></div>
+        </section>
+        <section>
+          <h2>桌宠</h2>
+          <div class="grid2">
+            <label>大小
+              <select id="s-scale">
+                <option value="2">小（96px）</option>
+                <option value="3" selected>中（128px）</option>
+                <option value="4">大（160px）</option>
+              </select>
+            </label>
+            <label>下班时间 <input type="time" id="s-offwork" value="17:30" /></label>
+            <label>发薪日（每月几号） <input type="number" id="s-payday" min="1" max="31" value="15" /></label>
+            <label>老板键 <input type="text" id="s-bosskey" readonly title="点「改键」后在键盘上按下新组合" /><button id="s-bosskey-set">改键</button></label>
+          </div>
+          <div class="checks">
+            <label><input type="checkbox" id="s-bubble" checked /> 显示台词气泡</label>
+            <label><input type="checkbox" id="s-badge" checked /> 显示脚下数字牌</label>
+            <label><input type="checkbox" id="s-avoidfs" checked /> 全屏放映时自动躲起来</label>
+            <label><input type="checkbox" id="s-autostart" /> 开机自启</label>
+          </div>
+        </section>
+        <section id="reminder-settings">
+          <h2>提醒</h2>
+          <div class="checks reminder-switches">
+            <label><input type="checkbox" id="s-remind-sedentary" checked /> 久坐提醒</label>
+            <label><input type="checkbox" id="s-remind-water" checked /> 喝水提醒</label>
+            <label><input type="checkbox" id="s-remind-eye" /> 护眼提醒</label>
+            <label><input type="checkbox" id="s-remind-exercise" checked /> 运动提醒</label>
+            <label><input type="checkbox" id="s-remind-sound" /> 轻提示音</label>
+            <label><input type="checkbox" id="s-lunch-alarm" checked /> 午休唤醒提示音</label>
+            <label><input type="checkbox" id="s-meeting" /> 开会模式</label>
+            <label><input type="checkbox" id="s-animations" /> 逐帧动画（实验，默认关）</label>
+          </div>
+          <div class="grid2 reminder-grid">
+            <label>久坐间隔
+              <select id="s-sedentary-minutes">
+                <option value="45">45 分钟</option>
+                <option value="60">60 分钟</option>
+                <option value="90">90 分钟</option>
+              </select>
+            </label>
+            <label>每日喝水目标 <input type="number" id="s-water-goal" min="1" max="20" value="8" /> 杯</label>
+            <label>喝水间隔 <input type="number" id="s-water-minutes" min="15" max="240" step="5" value="90" /> 分钟</label>
+            <label>护眼间隔 <select id="s-eye-minutes"><option value="20">20 分钟</option><option value="30">30 分钟</option><option value="45">45 分钟</option></select></label>
+            <label>每日运动目标 <input type="number" id="s-exercise-goal" min="1" max="8" value="3" /> 次</label>
+            <label>运动提醒 1 <input type="time" id="s-exercise-morning" value="10:30" /></label>
+            <label>运动提醒 2 <input type="time" id="s-exercise-afternoon" value="15:30" /></label>
+            <label>专注时长 <select id="s-focus-minutes"><option value="15">15 分钟</option><option value="25">25 分钟</option><option value="45">45 分钟</option></select></label>
+            <label>午休时长 <select id="s-lunch-minutes"><option value="20">20 分钟</option><option value="30">30 分钟</option><option value="45">45 分钟</option><option value="60">60 分钟</option></select></label>
+            <label>默认唤醒时间 <input type="time" id="s-lunch-wake-time" value="13:30" /></label>
+            <label>每小时最多 <input type="number" id="s-hourly-limit" min="1" max="12" value="3" /> 次</label>
+            <label>提醒开始 <input type="time" id="s-active-from" value="09:00" /></label>
+            <label>提醒结束 <input type="time" id="s-active-to" value="17:30" /></label>
+            <label>午休开始 <input type="time" id="s-lunch-from" value="12:00" /></label>
+            <label>午休结束 <input type="time" id="s-lunch-to" value="14:00" /></label>
+          </div>
+          <p class="hint">电脑静音或合盖时不会响。</p>
+          <p class="hint">开会、全屏、隐藏、午休和工作时段外会静默跳过，不会补发。</p>
+        </section>
+        <section>
+          <h2>台词</h2>
+          <div class="row">
+            <span>模式</span>
+            <select id="ln-mode">
+              <option value="mix">混合（我的台词更容易出现）</option>
+              <option value="custom_only">只用我的</option>
+              <option value="builtin_only">只用内置</option>
+            </select>
+            <span id="ln-mode-hint" class="hint"></span>
+          </div>
+          <div class="ln-add">
+            <input type="text" id="ln-input" placeholder="写一句台词，支持 {days}" />
+            <select id="ln-scene"></select>
+            <button id="ln-add-btn">添加</button>
+          </div>
+          <p class="hint"><span id="ln-count">0/30</span> · 台词只在你自己的电脑上显示，分享卡上也会用到，发出去之前再看一眼</p>
+          <p id="ln-error" class="ln-error hidden"></p>
+          <div id="ln-custom-list" class="ln-list"></div>
+          <div class="ln-io">
+            <button id="ln-export">导出台词</button>
+            <button id="ln-import">导入台词</button>
+            <input type="file" id="ln-import-file" accept=".json,application/json" hidden />
+          </div>
+          <p id="ln-import-report" class="hint"></p>
+          <details id="ln-builtin-box">
+            <summary id="ln-builtin-summary">内置台词</summary>
+            <div id="ln-builtin-list"></div>
+          </details>
+        </section>
+        <section>
+          <h2>皮肤</h2>
+          <div class="skin-list">
+            <button class="skin-item on" data-skin="default" type="button">默认皮肤</button>
+          </div>
+          <p class="hint">新皮肤放进 skins 目录后，重启应用即可出现在这里。</p>
+        </section>
+      </div>
+      <footer>
+        <button id="s-save" class="primary">保存</button>
+        <button id="s-clear">清除所有数据</button>
+        <button id="s-back">关闭</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="share-view" class="hidden">
+    <div class="share-wrap">
+      <canvas id="share-canvas" width="1080" height="1920"></canvas>
+      <div class="share-actions">
+        <select id="share-hero"><option value="mood-16">举牌</option><option value="mood-07">下班开心</option></select>
+        <label><input id="share-standups" type="checkbox" /> 显示今天起身次数</label>
+        <button id="share-save" class="primary">保存到本地</button>
+        <button id="share-copy">复制到剪贴板</button>
+        <button id="share-back">返回</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

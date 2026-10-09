@@ -1,0 +1,316 @@
+{
+  "id": "default",
+  "name": "默认皮肤",
+  "images": [
+    {
+      "id": "mood-01",
+      "file": "情绪表情/01-淡定.png",
+      "category": "mood",
+      "scenes": [
+        "idle"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-02",
+      "file": "情绪表情/02-喝茶.png",
+      "category": "mood",
+      "scenes": [
+        "tea"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "mood-03",
+      "file": "情绪表情/03-打哈欠.png",
+      "category": "mood",
+      "scenes": [
+        "morning"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-04",
+      "file": "情绪表情/04-馋饭.png",
+      "category": "mood",
+      "scenes": [
+        "lunch"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-05",
+      "file": "情绪表情/05-犯困.png",
+      "category": "mood",
+      "scenes": [
+        "afternoon"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-06",
+      "file": "情绪表情/06-开会放空.png",
+      "category": "mood",
+      "scenes": [
+        "meeting"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-07",
+      "file": "情绪表情/07-下班开心.png",
+      "category": "mood",
+      "scenes": [
+        "after-work"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-08",
+      "file": "情绪表情/08-周五兴奋.png",
+      "category": "mood",
+      "scenes": [
+        "friday"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-09",
+      "file": "情绪表情/09-被戳.png",
+      "category": "mood",
+      "scenes": [
+        "poke"
+      ],
+      "displayMs": 1200
+    },
+    {
+      "id": "mood-10",
+      "file": "情绪表情/10-无奈叹气.png",
+      "category": "mood",
+      "scenes": [
+        "overdue"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-11",
+      "file": "情绪表情/11-得意.png",
+      "category": "mood",
+      "scenes": [
+        "task-complete"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-12",
+      "file": "情绪表情/12-生气.png",
+      "category": "mood",
+      "scenes": [
+        "angry"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-13",
+      "file": "情绪表情/13-加班崩溃.png",
+      "category": "mood",
+      "scenes": [
+        "drag"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-14",
+      "file": "情绪表情/14-被表扬害羞.png",
+      "category": "mood",
+      "scenes": [
+        "all-complete"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-15",
+      "file": "情绪表情/15-感动.png",
+      "category": "mood",
+      "scenes": [
+        "milestone"
+      ],
+      "displayMs": 2000
+    },
+    {
+      "id": "mood-16",
+      "file": "情绪表情/16-举牌.png",
+      "category": "mood",
+      "scenes": [
+        "sign"
+      ],
+      "displayMs": 4000,
+      "boardRect": {
+        "x": 0.19,
+        "y": 0.11,
+        "w": 0.62,
+        "h": 0.18
+      }
+    },
+    {
+      "id": "health-01",
+      "file": "健康提醒/01-起身走走.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "stand-up"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-02",
+      "file": "健康提醒/02-伸懒腰.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "stretch-arms"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-03",
+      "file": "健康提醒/03-转脖子.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "turn-neck"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-04",
+      "file": "健康提醒/04-扭腰.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "twist-waist"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-05",
+      "file": "健康提醒/05-甩手臂.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "shake-arms"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-06",
+      "file": "健康提醒/06-原地踏步.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "march"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-07",
+      "file": "健康提醒/07-深蹲.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "squat"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-08",
+      "file": "健康提醒/08-站着放松.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "relax-standing"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-09",
+      "file": "健康提醒/09-拉伸腿.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "stretch-legs"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-10",
+      "file": "健康提醒/10-眼保健操.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "eye-break"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-11",
+      "file": "健康提醒/11-远眺放松.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "look-away"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-12",
+      "file": "健康提醒/12-深呼吸.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "deep-breath"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-13",
+      "file": "健康提醒/13-喝水.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "drink-water"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-14",
+      "file": "健康提醒/14-爬楼梯.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "stairs"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-15",
+      "file": "健康提醒/15-饭后散步.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "after-meal-walk"
+      ],
+      "displayMs": 5000
+    },
+    {
+      "id": "health-16",
+      "file": "健康提醒/16-下班快走.png",
+      "category": "health",
+      "scenes": [
+        "health-reminder",
+        "after-work-walk"
+      ],
+      "displayMs": 5000
+    }
+  ]
+}
