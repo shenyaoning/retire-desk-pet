@@ -66,7 +66,7 @@ fn detect_fullscreen() -> bool {
             return false;
         }
         let mut rect = RECT { left: 0, top: 0, right: 0, bottom: 0 };
-        if GetWindowRect(fg, &rect) == 0 {
+        if GetWindowRect(fg, &mut rect) == 0 {
             return false;
         }
         let mon = MonitorFromWindow(fg, MONITOR_DEFAULTTONEAREST);
@@ -85,7 +85,7 @@ fn detect_fullscreen() -> bool {
         }
         // 排除桌面/外壳窗口
         let mut buf = [0u16; 64];
-        let n = GetClassNameW(fg, &mut buf);
+        let n = GetClassNameW(fg, buf.as_mut_ptr(), buf.len() as i32);
         let class = String::from_utf16_lossy(&buf[..n.max(0) as usize]);
         !matches!(class.as_str(), "Progman" | "WorkerW" | "Shell_TrayWnd")
     }
