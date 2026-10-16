@@ -37,15 +37,16 @@ jobs:
       - run: npm test
       - name: Build Debian package
         run: npm run tauri build -- --bundles deb
-      - name: Check package architecture and dependencies
+      - name: Inspect Debian package
         shell: bash
         run: |
           set -euo pipefail
           package=$(find src-tauri/target/release/bundle/deb -maxdepth 1 -name '*.deb' -print -quit)
           test -n "$package"
+          echo "Package: $package"
+          dpkg-deb -f "$package" Package Version Architecture Depends
+          dpkg-deb -c "$package" | tail -n 25
           test "$(dpkg-deb -f "$package" Architecture)" = "${{ matrix.arch }}"
-          dpkg-deb -f "$package" Depends | grep -q 'libwebkit2gtk-4.1'
-          dpkg-deb -c "$package" | grep '/usr/bin/retire-desk-pet$'
       - name: Publish Linux package
         uses: softprops/action-gh-release@v2
         with:

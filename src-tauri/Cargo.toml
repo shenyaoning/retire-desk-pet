@@ -1,6 +1,6 @@
 [package]
 name = "retire-desk-pet"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 description = "退休倒计时桌宠"
 
