@@ -37,6 +37,23 @@ jobs:
       - run: npm test
       - name: Build Debian package
         run: npm run tauri build -- --bundles deb
+      - name: Normalize Debian package name
+        shell: bash
+        run: |
+          set -euo pipefail
+          package=$(find src-tauri/target/release/bundle/deb -maxdepth 1 -name '*.deb' -print -quit)
+          test -n "$package"
+          workspace=$(mktemp -d)
+          dpkg-deb --raw-extract "$package" "$workspace/unpacked"
+          sed -i 's/^Package: .*/Package: retire-desk-pet/' "$workspace/unpacked/DEBIAN/control"
+          fixed="$(dirname "$package")/retire-desk-pet_0.1.10_${{ matrix.arch }}.deb"
+          dpkg-deb --build "$workspace/unpacked" "$fixed"
+          rm "$package"
+          test "$(dpkg-deb --field "$fixed" Package)" = retire-desk-pet
+          test "$(dpkg-deb --field "$fixed" Architecture)" = "${{ matrix.arch }}"
+          dpkg-deb --field "$fixed" Depends | grep 'libwebkit2gtk-4.1-0'
+          dpkg-deb --contents "$fixed" > "$workspace/contents.txt"
+          grep '/usr/bin/retire-desk-pet$' "$workspace/contents.txt"
       - name: Publish Linux package
         uses: softprops/action-gh-release@v2
         with:
